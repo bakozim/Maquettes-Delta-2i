@@ -1,0 +1,101 @@
+
+<html>
+  <head>
+    <title>Calculateur d'itinéraire</title>
+    <meta http-equiv="Content-Type" content="application/xhtml+html; charset=utf-8" /
+    <meta name="Identifier-URL" content="http://votre.site.com">
+    <META NAME="Author" CONTENT="VDC">
+    <META NAME="OWNER" CONTENT="VDC">
+    <META name="Rating" content="general">
+    <META name="revisit-after" content="15 days">
+    <META name="robots" content="index, follow">
+    <META name="Robots" content="All">
+ 	
+    <META http-equiv="Content-Language" content="fr">
+    <LINK REL="SHORTCUT ICON" HREF="favicon.ico">
+    <style type="text/css">
+      body { font-family: Arial, Verdana, sans serif; font-size: 11px; margin: 2px; }
+      table.iti { background-color: FFFFFF; font-size: 11px; margin: 4px; }
+      table.directions th { background-color:#C5DDE7; font-size: 15px;}
+      table.directions td { font-size: 11px;}
+      img { color: #000000; }
+      #map_canvas { width: 396px; height: 460px; border: 0px solid #333333 ; margin: 0px;}
+      #directions { width: 2196px; height: 460px; border: 0px solid #333333 ; margin: 2px; overflow: auto; width: auto; text-align: left; font-size: 9px; }
+    </style>
+    <style type="text/css" media="print">
+      .print { display:none; }
+      #directions { width: 460px; height: auto; border: 0px solid #333333; margin: 2px; text-align: left; font-size: 9px; }
+    </style>
+    <script src=" http://maps.google.com/?file=api&amp;v=2.x&amp;key= AIzaSyDH3WwSFhTpqCLBWdwjKka9wbbc6bQCeao  " type="text/javascript"></script>
+    <script type="text/javascript">
+      var map;
+      var gdir;
+      var geocoder = null;
+      var addressMarker;
+      function initialize()
+        {
+        if (GBrowserIsCompatible())
+          {      
+          map = new GMap2(document.getElementById("map_canvas"));
+          gdir = new GDirections(map, document.getElementById("directions"));
+          GEvent.addListener(gdir, "load", onGDirectionsLoad); <!-- Charge la partie pour les distances -->
+          GEvent.addListener(gdir, "error", handleErrors); <!-- Charge la partie pour les messages d erreurs -->
+          map.setCenter(new GLatLng(45.766050, 3.133586), 6);
+          map.addControl(new GMapTypeControl());
+          map.addControl(new GLargeMapControl());
+          map.addControl(new GOverviewMapControl());
+          map.addControl(new GScaleControl());
+          map.enableScrollWheelZoom();
+          		  var point = new GLatLng(45.766050, 3.133586);
+	      map.addOverlay(new GMarker(point));
+          }
+        }
+      function setDirections(fromAddress, toAddress, locale)
+        {
+        gdir.load("from: " + fromAddress + " to: " + toAddress, { "locale": locale });
+        }
+      function handleErrors()
+        {
+        if (gdir.getStatus().code == G_GEO_UNKNOWN_ADDRESS)
+          alert("Aucune location géographique correspondante n'a pu être trouvée pour l'une des adresses spécifiées.\nCe qui peut être du �  une adresse récente, ou incorrecte.\nN'oubliez pas d'ajouter dans l'adresse le pays (en anglais).\nError code: " + gdir.getStatus().code);
+        else if (gdir.getStatus().code == G_GEO_SERVER_ERROR)
+          alert("La demande d'itinéraire n'a pu être calculée avec succès, aucune raison de l'échec n'est connu.\n Error code: " + gdir.getStatus().code);
+        else if (gdir.getStatus().code == G_GEO_MISSING_QUERY)
+          alert("The HTTP q parameter was either missing or had no value. For geocoder requests, this means that an empty address was specified as input. For directions requests, this means that no query was specified in the input.\n Error code: " + gdir.getStatus().code);
+        else if (gdir.getStatus().code == G_GEO_BAD_KEY)
+          alert("La clé (Key) n'est pas valide ou ne correspond pas au nom de domaine. \n Error code: " + gdir.getStatus().code);
+        else if (gdir.getStatus().code == G_GEO_BAD_REQUEST)
+          alert("La demande d'itinéraire n'a pu être correctement parsé.\n Error code: " + gdir.getStatus().code);
+        else alert("Une erreur inconnue est survenue.");
+        }
+      function onGDirectionsLoad()
+	    {
+        var reg=new RegExp("&nbsp;", "g");
+        kilometrage = gdir.getDistance().html;
+        document.getElementById("km").value = kilometrage.replace(reg,' ');
+        }
+    </script>
+  </head>
+
+  <BODY BGCOLOR="FFFFFF" TEXT="#000000" leftmargin="0" rightmargin="0" topmargin="0" bottommargin="0" marginheight="0" marginwidth="0" onLoad="initialize();" onUnload="GUnload()">
+    <form id="monFormulaire" method="post" action="#" onSubmit="setDirections(this.from.value, this.to.value, 'fr'); return false">
+      <table width="496" border="0" class="iti">
+        <tr valign="top">
+          <td align="right" width="40"><strong>Départ:</strong></td><td align="left" width="400"><input type="text" id="fromAddress" name="from" size="40"></td>
+          <td align="right" rowspan="3" width="40" valign="middle"><input name="gogogo" type="submit" value="Itinéraire" /><br><A href="javascript:window.print()"><img src="images/printer.gif" width="32" height="32" border="0" alt="Imprimer l'itinéraire" title="Imprimer l'itinéraire"></A></td>
+        </tr>
+<tr><td align="right"><strong>Arrivée:</strong></td><td align="left"><input type="text" name="ArriveeAlt" size="40" value="Delta2i" disabled><input type="hidden" id="toAddress" name="to" value="45.766050, 3.133586"></td></tr>
+
+        <tr><td align="right"><strong>Kms :</strong></td><td><input type="text" id="km" value="" size="9" disabled >&nbsp;Le nom d'un pays (en anglais) !</td></tr>
+	    <tr><td colspan="3">
+		  <center>
+	       <br>
+      </table>
+      <table width="500" border="0" class="directions" cellspacing="1" cellpadding="0">
+        <tr><th width="196">Itinéraire détaillé</th><th width="296" class="print">Carte</th></tr>
+        <tr><td><div id="directions"></td><td><div id="map_canvas" class="print"></div></td></tr>
+      </table>
+    </form>
+
+  </BODY>
+</HTML>
